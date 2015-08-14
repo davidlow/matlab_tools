@@ -1,9 +1,0 @@
-data/keithley2400_test.m.i
-data/keithley2400_sense.m.i
-data/keithley2400_init.m.i
-data/Keithley2400.m.i
-data/.hgignore.i
-data/keithley2400_source.m.i
-data/keithley2400_close.m.i
-data/keithley2400.m.i
-data/keithley2400_arrayscan.m.i
