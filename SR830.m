@@ -36,6 +36,7 @@ classdef SR830 < handle % {
 properties 
     visa    %visa object initialized in constructor
     par     %SR830 parameters
+    a
 end
 
 methods  % {
@@ -78,19 +79,28 @@ function this = SR830()
     set(this.visa, 'TimerPeriod',            1);
     set(this.visa, 'UserData',               []);
 
-    fprintf(this.visa, 'OUTX1'); 
+    this.init();
+    this.a=1;
 end
 
 function delete(this)
-    delete(this.visa)
-    clear this.visa
+%full clean close, including cleaning par
+    this.close();
+    delete(this.visa);
+    clear this.par;
+    clear this.visa;
 end
 
 %%%%%%% Measurement Methods
-function snapshot(this)
-    fprintf(this.visa, 'SNAP?3,4')
-    x = fscanf(this.visa, '%f,%f');
-    return x;
+function x = snapshot(this)
+    fprintf('SR830.snapshot: start\n');
+    try
+        fprintf(this.visa, 'SNAP?3,4\n');
+        x = fscanf(this.visa, '%f,%f');
+    catch ME
+        fprintf('SR830.snapshot: Error write or read\n');
+        rethrow(ME);
+    end
 end
 
 function sensitivity(this, level)
@@ -122,86 +132,125 @@ function sensitivity(this, level)
     %24 200 mV or nA
     %25 500 mV or nA
     %26 1    V or uA
-    fprintf(this.visa, ['SENS',num2str(level)]);
+    try
+        fprintf(this.visa, ['SENS ',num2str(level),'\n']);
+    catch ME
+        fprintf('SR830.sensitivity: Cannot write to SR830?\n')
+        this.close();
+        rethrow(ME);
+    end
 end
 
 
 %%%%%%% Helper Methods
 function init(this)
-    fprintf(this.visa, '*RST');  %initialize lockin
-    fprintf(this.visa, 'FAST0'); %disables fast 
+%Call me to init.  Has try catch safety
+    try
+        fopen(this.visa);
+    catch ME
+        fprintf('SR830.init: visa already open\n');
+        this.close();
+        rethrow(ME);
+    end
+
+    try
+        fprintf(this.visa, 'OUTX1\n'); 
+        fprintf(this.visa, '*RST\n');  %initialize lockin
+        fprintf(this.visa, 'FAST0\n'); %disables fast 
+        fprintf(this.visa, 'REST\n');  %clears data buffer
+    catch ME
+        fprintf('SR830.init: write error?\n');
+        this.close();
+        rethrow(ME);
+    end
+        
+end
+
+function close(this)
+    fclose(this.visa);
+    fprintf('SR830.close: closed\n');
+end
 
 function getparams(this)
 %copied from getparameters_SR830.m from moler lab 
 %(matlab_measure/scanning/getparameters_SR830.m)
-    fprintf(sr830, '*IDN?')
-    par.id = fscanf(sr830);
+%has try catch safety with clean exit
+
+try
+    fprintf(this.visa, '*IDN?\n');
+    this.par.id = fscanf(this.visa);
             
-    fprintf(sr830, 'PHAS?')
-    par.phase = fscanf(sr830, '%f');
+    fprintf(this.visa, 'PHAS?\n');
+    this.par.phase = fscanf(this.visa);
                     
-    fprintf(sr830, 'FMOD?')
-    par.internal_ref = fscanf(sr830, '%i');
+    fprintf(this.visa, 'FMOD?\n');
+    this.par.internal_ref = fscanf(this.visa);
                             
-    fprintf(sr830, 'FREQ?')
-    par.freq = fscanf(sr830, '%f');
+    fprintf(this.visa, 'FREQ?\n');
+    this.par.freq = fscanf(this.visa, '%f');
                                     
-    fprintf(sr830, 'HARM?')
-    par.harmonic = fscanf(sr830, '%i');
+    fprintf(this.visa, 'HARM?\n');
+    this.par.harmonic = fscanf(this.visa, '%i');
                                             
-    fprintf(sr830, 'SLVL?')
-    par.vOutRMS = fscanf(sr830, '%f');
-                                                    
-    fprintf(sr830, 'ISRC?')
-    par.in_config = fscanf(sr830, '%i');
+    fprintf(this.visa, 'SLVL?\n');
+    this.par.vOutRMS = fscanf(this.visa, '%f');
+                                                   
+    fprintf(this.visa, 'ISRC?\n');
+    this.par.in_config = fscanf(this.visa, '%i');
                                                             
-    fprintf(sr830, 'IGND?')
-    par.in_shield_gnd = fscanf(sr830, '%i');
+    fprintf(this.visa, 'IGND?\n');
+    this.par.in_shield_gnd = fscanf(this.visa, '%i');
                                                                     
-    fprintf(sr830, 'ICPL?')
-    par.in_coup_dc = fscanf(sr830, '%i');
+    fprintf(this.visa, 'ICPL?\n');
+    this.par.in_coup_dc = fscanf(this.visa, '%i');
                                                                             
-    fprintf(sr830, 'ILIN?')
-    par.in_notch = fscanf(sr830, '%i');
+    fprintf(this.visa, 'ILIN?\n');
+    this.par.in_notch = fscanf(this.visa, '%i');
     
-    fprintf(sr830, 'SENS?')
-    i = fscanf(sr830, '%i');
+    fprintf(this.visa, 'SENS?\n');
+    i = fscanf(this.visa, '%i');
 
     switch rem(i, 3)
     case 0
-         par.sens = 2;
+         this.par.sens = 2;
     case 1 
-         par.sens = 5;
+         this.par.sens = 5;
     case 2
-         par.sens = 10; 
+         this.par.sens = 10; 
     end;
 
-    par.sens = par.sens * 10^(fix(i/3)-9); 
+    this.par.sens = this.par.sens * 10^(fix(i/3)-9);
     
-    fprintf(sr830, 'OEXP? 1')
-    x = fscanf(sr830, '%f, %f');
-    par. exp_x = 10^x(2);
-    par. off_x = x(1);
+    fprintf(this.visa, 'OEXP? 1\n');
+    this.par.oexp = fscanf(this.visa);
     
-    fprintf(sr830, 'RMOD?')
-    par.reserve = fscanf(sr830, '%i');
+    fprintf(this.visa, 'RMOD?\n');
+    this.par.reserve = fscanf(this.visa);
     
-    fprintf(sr830, 'OFLT?')
-    i = fscanf(sr830, '%i');
+    fprintf(this.visa, 'OFLT?\n');
+    i = fscanf(this.visa, '%i');
     switch rem(i, 2)
     case 0
-         par.timeconst = 1;
+         this.par.timeconst = 1;
     case 1 
-         par.timeconst = 3;
+         this.par.timeconst = 3;
     end;
 
-    par.timeconst = par.timeconst * 10^(fix(i/2)-5);
+    this.par.timeconst = this.par.timeconst * 10^(fix(i/2)-5);
 
-    fprintf(sr830, 'OFSL?')
-    par.slope = 6 * fscanf(sr830, '%i') + 6;
+    fprintf(this.visa, 'OFSL?\n');
+    this.par.slope = 6 * fscanf(this.visa, '%i') + 6;
 
-    fprintf(sr830, 'SYNC?')
-    par.sync = fscanf(sr830, '%i');
+    fprintf(this.visa, 'SYNC?\n');
+    this.par.sync = fscanf(this.visa, '%i');
+
+    fprintf(this.visa, 'SENS?\n');
+    this.par.sensitivity = fscanf(this.visa,'%i');
+catch ME
+    fprintf('SR830.getparams: error, exiting\n');
+    this.close();
+    rethrow(ME);
+end
 end
 
 end % } END methods
