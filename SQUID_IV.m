@@ -2,9 +2,31 @@
 % clear all
 % close all
 
-%% Parameters
-gain = 1000;
-mod_current_ua = 0;
+
+%% Create NI daq object
+nidaq = NIdaq('');
+
+%% Set parameters to be used / saved by LoggableObj
+% Add and set parameters here! not in the code! if you want more params
+% add them here  All of these 'should' be saved ;)
+nidaq.p.gain       = 500;
+nidaq.p.lpf0       = 100;
+nidaq.p.mod_curr   = 0e-6;
+nidaq.p.rate       = 10;
+nidaq.p.range      = 5; % options: 0.1, 0.2, 0.5, 1, 2, 5, 10
+nidaq.p.src_amp    = .2;
+nidaq.p.src_numpts = 100;
+nidaq.p.mod_biasr  = 10e3;
+nidaq.p.T          = 8.42;
+nidaq.p.Terr       = .061;
+
+
+%% Setup scan
+nidaq.setrate(nidaq.p.rate);
+nidaq.addinput_A('Dev1', 0, 'Voltage', nidaq.p.range, 'measurement');
+nidaq.addinput_A('Dev1', 4, 'Voltage', nidaq.p.range, 'unused');
+
+
 
 %% Set up session and input/ouput channels
 % devices = daq.getDevices;         % Shows list of available devices, not necessary to run code
