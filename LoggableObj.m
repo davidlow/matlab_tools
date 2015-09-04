@@ -35,7 +35,7 @@ methods (Access = protected)
     function filename = saveparams(this, keys)
         this.populategit();
         parameters = struct(this.namestring, struct());
-        keys = [keys, {'git', 'namestring', 'notes', 'p'}];
+        keys = [keys, {'git', 'namestring', 'savedir', 'notes', 'p',}];
         for i = 1:length(keys)
             parameters.(this.namestring).(keys{i}) = this.(keys{i});
         end
