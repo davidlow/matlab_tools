@@ -33,8 +33,8 @@ classdef NIdaq < LoggableObj % {
 
 properties (Access = public)
     session     %session object
-    inputs      %array of input  channels structs
-    outputs     %array of output channels structs
+    inputs      %array of input  channels structs (sense)
+    outputs     %array of output channels structs (source)
                 % structs defined only in addinput() or addoutput()
 end
 
@@ -104,7 +104,8 @@ end
 
 function setoutputdata(this, channelnumber, data)
 %data has 1 more entry at the end than necessary to cope with weirdness
-%with data taking 
+%with data taking.
+%format of data can be either a row or column vector, as long as 1D
 %TODO (need to check this to make sure it works!!!!)
     i = CSUtils.findnumname(this.outputs, 'channelnumber', channelnumber);
     this.outputs(i).data = zeros(length(data)+1,1);
@@ -123,13 +124,30 @@ function [data, time] = run(this)
     this.session.queueOutputData(datalist);
     [data, time] = this.session.startForeground;
 
-    data(end,:) = []; %removes last row
-
+    data(1,:) = []; %removes last data because it's a dupe
+    time(1,:) = []; %remove last time as well
+    
+    tmp = [data, time]; % I don't know why, but this gave no error...
+    
     this.saveparams({'inputs','outputs'});
-    this.savedata  ([date, time]);
+    this.savedata  (tmp, this.savedataheader);
 end
 
 end % } END methods
+
+methods(Access = private)
+    function str = savedataheader(this)
+        str = ['# ',LoggableObj.timestring(),', ',this.namestring,'\n# '];
+        for i = 1:length(this.outputs)
+            units = '(A), ';
+            if(strcmp('Voltage', this.outputs(i).measurementtype))
+                units = '(V), ';
+            end
+            str = [str, this.outputs(i).label, ' ', units];
+        end
+        str = [str, 'time (s)\n'];
+    end
+end
 
 end % } ENE class 
 % END OF FILE

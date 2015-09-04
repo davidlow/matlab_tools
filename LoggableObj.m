@@ -43,9 +43,12 @@ methods (Access = protected)
         save(filename, '-struct', 'parameters');
     end
 
-    function filename = savedata(this, datamatrix)
+    function filename = savedata(this, datamatrix, header)
         filename = [this.savedir, this.datastring()];
-        csvwrite(filename, datamatrix);
+        file = fopen(filename, 'w');
+        fprintf(file, header);
+        fclose(file);
+        dlmwrite(filename, datamatrix, '-append');
     end
 
 end 
@@ -68,8 +71,9 @@ methods (Access = private)
     function populategit(this)
         this.git = 'No git or improperly installed';
         try 
-            this.git = [system('git rev-parse HEAD'), '\n', ... 
-                        system('git status -s')];
+            [~, cmdout1] = system('git rev-parse HEAD');
+            [~, cmdout2] = system('git status -s');
+            this.git = [cmdout1, '\n', cmdout2];
         catch
             
         end 
