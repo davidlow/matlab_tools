@@ -4,7 +4,7 @@
 
 
 %% Create NI daq object
-nidaq = NIdaq('Z:/data/montana_b69/Bad_Squid_Tests/150904');
+nidaq = NIdaq('Z:/data/montana_b69/Bad_Squid_Tests/150906');
 
 %% Set parameters to be used / saved by LoggableObj
 % Add and set parameters here! not in the code! if you want more params
@@ -14,21 +14,21 @@ nidaq.p.lpf0       = 100;
 nidaq.p.mod_curr   = 70e-6;
 nidaq.p.mod_biasr   = 12e3;
 nidaq.p.rate       = 10;
-nidaq.p.range      = 5; % options: 0.1, 0.2, 0.5, 1, 2, 5, 10
+nidaq.p.range      = 10; % options: 0.1, 0.2, 0.5, 1, 2, 5, 10
 nidaq.p.src_amp    = .3;
 nidaq.p.src_numpts = 100;
 nidaq.p.squid_biasr  = 5e3;
-nidaq.p.T          = 4.2;
-nidaq.p.Terr       = .012;
+nidaq.p.T          = 9.0;
+nidaq.p.Terr       = .060;
 
 nidaq.notes = 'First Squid test';
 
 
 %% Setup scan
 nidaq.setrate(nidaq.p.rate);
-nidaq.addinput_A ('Dev1', 0, 'Voltage', nidaq.p.range, 'Squid V');
+nidaq.addinput_A ('Dev1', 0, 'Voltage', nidaq.p.range, 'Mod V');
 nidaq.addinput_A ('Dev1', 4, 'Voltage', nidaq.p.range, 'unused');
-nidaq.addoutput_A('Dev1', 0, 'Voltage', nidaq.p.range, 'Squid I');
+nidaq.addoutput_A('Dev1', 0, 'Voltage', nidaq.p.range, 'Mod I');
 nidaq.addoutput_A('Dev1', 1, 'Voltage', nidaq.p.range, 'unused');
 
 %% Setup data
