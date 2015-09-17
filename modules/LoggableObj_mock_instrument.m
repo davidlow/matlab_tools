@@ -1,4 +1,4 @@
-classdef LoggableObj_test < LoggableObj
+classdef LoggableObj_mock_instrument < LoggableObj
 
 properties (Access = public)
     newprop 
@@ -6,7 +6,7 @@ properties (Access = public)
 end
 
 methods (Access = public)
-    function this = LoggableObj_test(name, dir)
+    function this = LoggableObj_mock_instrument(name, dir)
         this = this@LoggableObj(name, dir);
         this.newprop = 10;
         this.newprop = 11;

@@ -1,5 +1,5 @@
 name = 'test_LoggableObject';
-l = LoggableObj_test(name, 'testout/');
+l = LoggableObj_mock_instrument(name, 'testout/'); % create a mock instrument for testing
 l.notes = 7;
 l.p.param = 1;
 l.p.lifeistough = 9e10;

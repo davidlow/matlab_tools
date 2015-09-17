@@ -14,6 +14,7 @@
 %   You should have received a copy of the GNU General Public License
 %   along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+% Important note: this driver is still incomplete (20150917 DL/GP)
 
 classdef SR830 < handle % {
 % NAME
