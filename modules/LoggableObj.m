@@ -1,5 +1,5 @@
 classdef LoggableObj < handle % {
-
+% 15 09 17: Fix the populategit method -DL
 properties (Access = public)
     notes   % NOTES to save
     p       % Parameters to save
@@ -68,15 +68,12 @@ methods (Access = private)
 
    
 
-    function populategit(this)
-        this.git = 'No git or improperly installed';
-        try 
-            [~, cmdout1] = system('git rev-parse HEAD');
-            [~, cmdout2] = system('git status -s');
-            this.git = [cmdout1, '\n', cmdout2];
-        catch
-            
-        end 
+    function populategit(this, dir, author, message)
+        %FIX ME
+        % what this should do is get the current working directory
+        % of this script and use that for the dir.  message 
+        % might be default as well.  like 'default commit for measurement
+        this.git = GitUtils.git(dir, author, message);
     end
 
 end % }end private methods

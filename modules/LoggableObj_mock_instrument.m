@@ -17,9 +17,9 @@ methods (Access = public)
         clear this.newprop;
     end 
 
-    function [paramname, savename] = savetestdata(this, data)
+    function [paramname, savename] = savetestdata(this, data, header)
         paramname = this.saveparams({'newprop','newprop2'});
-        savename  = this.savedata  (data);
+        savename  = this.savedata  (data, header);
     end
 end
 end
