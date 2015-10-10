@@ -29,19 +29,20 @@ classdef NIdaq < LoggableObj % {
 %       care about are:
 %
 % CHANGE LOG
-%       2015 08 26: dhl88: created
+%       2015 10 02: dl: reproduced and solved the input/output offset bug 
+%       2015 08 26: dl: created
 
 properties (Access = public)
     session     %session object
-    inputs      %array of input  channels structs (sense)
-    outputs     %array of output channels structs (source)
+    sense      %array of input  channels structs (sense)
+    source     %array of output channels structs (source)
                 % structs defined only in addinput() or addoutput()
 end
 
 methods (Access = public) % {
 
 
-function this = NIdaq(savedir)
+function this = NIdaq(author, savedir)
 % NAME
 %       NIdaq()
 % SYNOPSIS
@@ -49,15 +50,15 @@ function this = NIdaq(savedir)
 % RETURN
 %       Returns a NIdaq object that extends handle.  
 %       Handle is used to pass a refere
-    this = this@LoggableObj('NIdaq',savedir);
+    this = this@LoggableObj('NIdaq',author, savedir);
     this.session = daq.createSession('ni');
 end
 
 function delete(this)
 %full clean close, including cleaning par
     this.delete@LoggableObj();
-    clear this.inputs;
-    clear this.outputs;
+    clear this.sense;
+    clear this.source;
     release(this.session);
 end
 
@@ -80,7 +81,7 @@ function handle = addinput_A(this, ...
                 'handle',           handle,...
                 'label',            label...
                 );
-    this.inputs = [this.inputs, input_s];
+    this.sense = [this.sense, input_s];
 end
 
 function handle = addoutput_A(this, ...
@@ -98,8 +99,8 @@ function handle = addoutput_A(this, ...
                 'label',            label,...
                 'data',             []...
                 );
-    this.outputs = [this.outputs, output_s];
-    this.outputs = CSUtils.sortnumname(this.outputs, 'channelnumber');
+    this.source = [this.source, output_s];
+    this.source = CSUtils.sortnumname(this.source, 'channelnumber');
 end
 
 function setoutputdata(this, channelnumber, data)
@@ -107,30 +108,50 @@ function setoutputdata(this, channelnumber, data)
 %with data taking.
 %format of data can be either a row or column vector, as long as 1D
 %TODO (need to check this to make sure it works!!!!)
-    i = CSUtils.findnumname(this.outputs, 'channelnumber', channelnumber);
-    this.outputs(i).data = zeros(length(data)+1,1);
+%DL 151002: Something is definitely wrong!
+    i = CSUtils.findnumname(this.source, 'channelnumber', channelnumber);
+    this.source(i).data = zeros(length(data)+1,1);
     for j = 1:length(data)
-        this.outputs(i).data(j) = data(j);
+        this.source(i).data(j) = data(j);
     end
-    this.outputs(i).data(length(data)+1) = data(length(data));
+    this.source(i).data(length(data)+1) = data(length(data));
 end
 
 %%%%%%% Measurement Methods
-function [data, time] = run(this)
-    datalist = zeros(length(this.outputs(1).data),length(this.outputs));
-    for i = 1:length(this.outputs)
-        datalist(:,i) = this.outputs(i).data; %set each column 
+function [data, time] = run(this, willsave)
+    if nargin < 2
+        willsave = 1;
+    end
+    
+    datalist = zeros(length(this.source(1).data),length(this.source));
+    for i = 1:length(this.source)
+        datalist(:,i) = this.source(i).data; %set each column 
     end
     this.session.queueOutputData(datalist);
     [data, time] = this.session.startForeground;
+    
+    
+    
+    sourcedata = zeros(length(data), length(this.source));
+    for i = 1:length(this.source)
+        sourcedata(:,i) = this.source(i).data;
+    end
+    
+    sourcedata(end,:) = [];
+    data(1,:) = []; %first data point has output from last time daq ran!
+    time(1,:) = []; %measure at the very instant the voltage is changed
+    
+    tmp = [sourcedata, data, time]; % I don't know why, but this gave no error...
+    
+    if willsave
+        this.saveparams({'sense','source'});
+        this.savedata  (tmp, this.savedataheader);
+    end
+end
 
-    data(1,:) = []; %removes last data because it's a dupe
-    time(1,:) = []; %remove last time as well
-    
-    tmp = [data, time]; % I don't know why, but this gave no error...
-    
-    this.saveparams({'inputs','outputs'});
-    this.savedata  (tmp, this.savedataheader);
+function save(this)
+    % saves parameters
+    this.saveparams({'sense','source'});
 end
 
 end % } END methods
@@ -138,12 +159,19 @@ end % } END methods
 methods(Access = private)
     function str = savedataheader(this)
         str = ['# ',LoggableObj.timestring(),', ',this.namestring,'\n# '];
-        for i = 1:length(this.outputs)
+        for i = 1:length(this.source) % this is source
             units = '(A), ';
-            if(strcmp('Voltage', this.outputs(i).measurementtype))
+            if(strcmp('Voltage', this.source(i).measurementtype))
                 units = '(V), ';
             end
-            str = [str, this.outputs(i).label, ' ', units];
+            str = [str, this.source(i).label, ' ', units];
+        end
+        for i = 1:length(this.sense) % this is sense
+            units = '(A), ';
+            if(strcmp('Voltage', this.sense(i).measurementtype))
+                units = '(V), ';
+            end
+            str = [str, this.sense(i).label, ' ', units];
         end
         str = [str, 'time (s)\n'];
     end

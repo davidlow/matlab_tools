@@ -40,7 +40,7 @@ end
 methods (Access = public) % {
 
 
-function this = Agilent33250A(savedir)
+function this = Agilent33250A(author, savedir)
 % NAME
 %       NIdaq()
 % SYNOPSIS
@@ -48,7 +48,7 @@ function this = Agilent33250A(savedir)
 % RETURN
 %       Returns a NIdaq object that extends handle.  
 %       Handle is used to pass a refere
-    this = this@LoggableObj('Agilent33250A',savedir);
+    this = this@LoggableObj('Agilent33250A',author, savedir);
     this.visa = visa('ni','GPIB0::10::INSTR');
 
     % this is from the keithley driver... I think it's necessary?
@@ -79,7 +79,7 @@ function this = Agilent33250A(savedir)
     
     fopen(this.visa);
     
-	fprintf(this.visa, '*RST');
+	%fprintf(this.visa, '*RST'); % resets agilent to factory setting
     fprintf(this.visa, '*CLS');
     
 end
@@ -95,51 +95,64 @@ end
 function outputz(this, zout... %output impedance in ohms, 1-10k
                 )
     this.checkerror();
-    fprintf('outputz\n');
-    str = ['OUTP:LOAD ', num2str(zout)];
+    %fprintf('outputz\n'); % for debugging purposes
+    str = ['OUTP:LOAD ', num2str(zout), '\n'];
     fprintf(this.visa, str);
 end
+
 function applywave(this, ...
        funct, ... %"SIN", "SQU"are, "RAMP", "PULS"e, "NOIS"e, DC, "USER"
        freq,  ... %frequency in Hz
        amp,   ... %amplitude in Vpp
        offset... %offset voltage in V V_dc
        )
-   fprintf('applywave\n');
+   %fprintf('applywave\n'); % for debugging purposes
    this.checkerror();
    str = ['APPL:', funct, ' ', num2str(freq),   ' HZ, '];
    str = [str,                 num2str(amp),    ' VPP, ' ];
-   str = [str,                 num2str(offset), ' V' ];
+   str = [str,                 num2str(offset), ' V\n' ];
    fprintf(this.visa, str);
 end
 
-
-function freqsweep(fstart, ...%start freq in Hz
-                   fstop,  ...%stop  freq in Hz
-                   spacing,...%string, "LIN" or "LOG"
-                   time   ...%time of total sweep in sec
-                   )
-    return %incomplete method
+function freqOut = getFreq(this) % reads frequency in Hz
+   this.checkerror();
+   %fprintf('getfreq after check error\n');
+   fprintf(this.visa, 'FREQ?'); % DO NOT ADD \n after "FREQ?"!!! Doesn't like it!
+   %fprintf('getfreq after this.visa\n');
+   freqOut = fscanf(this.visa, '%f');
+   %fprintf('somet\n');
 end
+
+function setFreq(this, freqVal) % sets frequency in Hz
+    this.checkerror();
+    fprintf(this.visa, ['FREQ ', num2str(freqVal), '\n']);
+end
+
+% function freqsweep(fstart, ...%start freq in Hz
+%                    fstop,  ...%stop  freq in Hz
+%                    spacing,...%string, "LIN" or "LOG"
+%                    time   ...%time of total sweep in sec
+%                    )
+%     return %incomplete method
+% end
 
 end % } END methods
 
-methods(Access = private)
+methods(Access = public)
     function checkerror(this)
-        fprintf('checkerror\n');
         while(1)
-            fprintf('while\n');
+            %fprintf('inside while checkerror\n')
             fprintf(this.visa,'SYST:ERR?');
             err = fscanf(this.visa, '%f,%255c');
             errnum = err(1);
             if (errnum == 0)
                 break;
             else
-                fprintf([num2str(err(1)), char(err(2:end))']);
+                fprintf([num2str(err(1)), ' ', char(err(2:end))', ' \n']);
             end
         end
     end
 end
 
-end % } ENE class 
+end % } END class 
 % END OF FILE

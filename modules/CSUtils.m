@@ -30,5 +30,25 @@ methods (Static)
             array(lowest) = tmp;
         end
     end
+    
+    function str = parsefnameplot(str)
+        str = regexprep(str, '_', '\\_');
+    end
+    
+    function savecsv(filename, datamatrix, header)
+        file = fopen(filename, 'w');
+        fprintf(file, header);
+        fclose(file);
+        
+        dlmwrite(filename, datamatrix, '-append');
+    end
+    
+    function currentcheck(currents, bound)
+        for c = currents
+            if abs(c) > bound
+                error('Current exceeds bounds');
+            end
+        end
+    end
 end
 end
