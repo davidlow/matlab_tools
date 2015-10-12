@@ -16,7 +16,7 @@ nq = NIdaq('DL', 'Z:/data/montana_b69/Squid_Tests/151011/'); %save path
 % Add and set parameters here! not in the code! if you want more params
 % add them here  All of these 'should' be saved ;)
 nq.p.gain        = 500;
-nq.p.lpf0        = 100;
+nq.p.lpf0        = 300;
 nq.p.rate        = 100; %0.1 < rate < 2 857 142.9
 nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
 
@@ -32,7 +32,7 @@ nq.p.T           = 4.3;
 nq.p.Terr        = .013;
 nq.p.scantime    = 0;
 
-nq.notes = 'larger resistor, guen thinks nidaq voltage noisy causes hysteresis';
+nq.notes = 'testing autoplotting again';
 
 %% Setup scan
 
@@ -73,8 +73,7 @@ title({['param = ', CSUtils.parsefnameplot(nq.lastparamsave)], ...
        ]});
 xlabel('I_{bias} = V_{bias}/R_{bias} (\mu A)','fontsize',20);
 ylabel('V_{squid} (V)','fontsize',20);
-mfilename
-print('-dpng', [nq.savedir,'autoplots/',LoggableObj.timestring(),'_', mfilename,'.png']);
+CSUtils.saveplots(nq.savedir, mfilename);
 nq.delete();
 
 
