@@ -25,6 +25,8 @@ nq.p.squid.I_span= 100e-6; % total span in amps
 nq.p.squid.I_step= .1e-6;  % current step in amps
 nq.p.squid.biasr = 2.5e3 + 10e3; %1.0k + 1.5k cold, 10k warm
 
+nq.p.ramppts     = 10;
+
 nq.p.mod.curr    = 0;
 nq.p.mod.biasr   = 2.5e3;
 
@@ -32,44 +34,55 @@ nq.p.T           = 4.3;
 nq.p.Terr        = .013;
 nq.p.scantime    = 0;
 
-nq.notes = 'scan far out to see high curr behavior';
+nq.notes = 'testing code for plotting forward and backward curves';
 
 %% Setup scan
 
 nq.addinput_A ('Dev1', 0, 'Voltage', nq.p.range, 'SQUID V (sense)');
-nq.addinput_A ('Dev1', 4, 'Voltage', nq.p.range, 'unused');
 nq.addoutput_A('Dev1', 0, 'Voltage', nq.p.range, 'SQUID I (source)');
 nq.addoutput_A('Dev1', 1, 'Voltage', nq.p.range, 'unused');
 
 nq.setrate    (nq.p.rate);
+     
+squidVsraw = nq.p.squid.biasr * MathUtils.span2array(nq.p.squid.I_cntr,... 
+                                                     nq.p.squid.I_span,...
+                                                     nq.p.squid.I_step);
+squidVs = MathUtils.smoothrmp_lo2hi(squidVsraw, nq.p.ramppts);
 
-numpts = nq.p.squid.I_span / nq.p.squid.I_step;
+modVs =   nq.p.mod.curr * nq.p.mod.biasr * linspace(1,1,length(squidVs));
 
-%% Setup data
-desout = {nq.p.squid.I_span * nq.p.squid.biasr * ...
-            sin(linspace(0,2*pi,numpts)) + ...
-          nq.p.squid.I_cntr * nq.p.squid.biasr,...
-          nq.p.mod.curr * nq.p.mod.biasr *  ...  
-            linspace(1,1,numpts)  ...
-         };
-nq.setoutputdata(0,desout{1});
-nq.setoutputdata(1,desout{2});
+CSUtils.currentcheck(squidVs / nq.p.squid.biasr, 100e-6);
+CSUtils.currentcheck(modVs   / nq.p.mod.biasr, 300e-6);
+
+nq.setoutputdata(0,squidVs);
+nq.setoutputdata(1,modVs);
 
 %% Run / collect data
-[data, time] = nq.run();
+[rawdata, time] = nq.run();
 
 %% Plot
-plot(desout{1}/nq.p.squid.biasr*1e6, data(:,1)/nq.p.gain);
+
+dataf = MathUtils.striprmp_1(rawdata, nq.p.ramppts, length(squidVsraw));
+datab = MathUtils.striprmp_2(rawdata, nq.p.ramppts, length(squidVsraw));
+
+dataf = dataf / nq.p.gain;
+datab = datab / nq.p.gain;
+datainf = squidVsraw           / nq.p.squid.biasr*1e6;
+datainb = squidVsraw(end:-1:1) / nq.p.squid.biasr*1e6;
+
 hold on
-title({['param = ', CSUtils.parsefnameplot(nq.lastparamsave)], ...
+plot(datainf, dataf, 'r');
+plot(datainb, datab, 'b');
+
+title({ ...
        ['data  = ', CSUtils.parsefnameplot(nq.lastdatasave)],  ...
        ['gain=',           num2str(nq.p.gain),                 ...
        ', lp f_0 =',      num2str(nq.p.lpf0),                 ...
        ', hz, rate =',    num2str(nq.p.rate),                 ...
-       ', hz r_{bias} = ' num2str(nq.p.squid.biasr),            ...
-       'ohms, squidIstep = ' num2str(nq.p.squid.I_step),       ...
-       'amps, modcurr = '   num2str(nq.p.mod.curr),             ...
-       ', T = '           num2str(nq.p.T)                     ...
+       ', hz r_{bias} = ' num2str(nq.p.squid.biasr),'ohms', ...
+       'T = '           num2str(nq.p.T)],...
+       ['squidIstep = ' num2str(nq.p.squid.I_step), 'amps, '       ...
+       'modcurr = '   num2str(nq.p.mod.curr),             ...
        ]});
 xlabel('I_{bias} = V_{bias}/R_{bias} (\mu A)','fontsize',20);
 ylabel('V_{squid} (V)','fontsize',20);
