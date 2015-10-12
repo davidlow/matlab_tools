@@ -71,8 +71,8 @@ datainf = squidVsraw           / nq.p.squid.biasr*1e6;
 datainb = squidVsraw(end:-1:1) / nq.p.squid.biasr*1e6;
 
 hold on
-plot(datainf, dataf, 'ro');
-plot(datainb, datab, 'bo');
+plot(datainf, dataf, 'ro-');
+plot(datainb, datab, 'bs-');
 legend('low to high', 'high to low');
 
 title({ ...
