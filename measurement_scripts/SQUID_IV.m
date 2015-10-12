@@ -71,8 +71,9 @@ datainf = squidVsraw           / nq.p.squid.biasr*1e6;
 datainb = squidVsraw(end:-1:1) / nq.p.squid.biasr*1e6;
 
 hold on
-plot(datainf, dataf, 'r');
-plot(datainb, datab, 'b');
+plot(datainf, dataf, 'ro');
+plot(datainb, datab, 'bo');
+legend('low to high', 'high to low');
 
 title({ ...
        ['data  = ', CSUtils.parsefnameplot(nq.lastdatasave)],  ...
