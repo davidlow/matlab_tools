@@ -71,7 +71,8 @@ title({['param = ', CSUtils.parsefnameplot(nq.lastparamsave)], ...
        ]});
 xlabel('I_{bias} = V_{bias}/R_{bias} (\mu A)','fontsize',20);
 ylabel('V_{squid} (V)','fontsize',20);
-
+mfilename
+print('-dpng', [nidaq.savedir,'autoplots/',LoggableObj.timestring(),'_', mfilename,'.png']);
 nq.delete();
 
 
