@@ -136,7 +136,7 @@ title({['param = ', CSUtils.parsefnameplot(nidaq.lastparamsave)], ...
        ]});
 xlabel('I_{squid} (A)','fontsize',20);
 ylabel('I_{mod} (A)','fontsize',20);
-
+CSUtils.saveplots(pathroot, mfilename);
 nidaq.delete();
 
 
