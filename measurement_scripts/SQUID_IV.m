@@ -16,8 +16,8 @@ nq = NIdaq('DL', 'Z:/data/montana_b69/Squid_Tests/151011/'); %save path
 % Add and set parameters here! not in the code! if you want more params
 % add them here  All of these 'should' be saved ;)
 nq.p.gain        = 500;
-nq.p.lpf0        = 300;
-nq.p.rate        = 100; %0.1 < rate < 2 857 142.9
+nq.p.lpf0        = 1000;
+nq.p.rate        = 900; %0.1 < rate < 2 857 142.9
 nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
 
 nq.p.squid.I_cntr= 0e-6;  % center current in amps
