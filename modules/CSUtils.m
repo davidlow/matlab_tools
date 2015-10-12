@@ -50,5 +50,9 @@ methods (Static)
             end
         end
     end
+    
+    function saveplots(rootdir, filename)
+        print('-dpng', [rootdir,'autoplots/',LoggableObj.timestring(),'_', filename,'.png']);
+    end
 end
 end

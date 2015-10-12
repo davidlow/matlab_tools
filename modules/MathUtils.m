@@ -15,6 +15,13 @@ methods (Static)
         end
     end
     
+    function [array,numpts] = span2array(center,span,step)
+        numpts = span / step;
+        array = linspace(center - span/2, ...
+                         center + span/2, ...
+                         numpts ); 
+    end
+    
     function array = smoothrmp_lo2hi(rawarray, ramppts)
     %smoothly ramps from 0 -> rawarray -> rawarray backwards -> 0
     %the transitions from 0 <-> rawarray(1) is sin(0), sin(pi/2)
