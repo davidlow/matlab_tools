@@ -34,7 +34,7 @@ nq.p.T           = 4.3;
 nq.p.Terr        = .013;
 nq.p.scantime    = 0;
 
-nq.notes = 'low resistance, doing same slow scan';
+nq.notes = 'low resistance, doing same slow scan. prev was grounded';
 
 %% Setup scan
 
