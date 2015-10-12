@@ -23,7 +23,7 @@ nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
 nq.p.squid.I_cntr= 0e-6;  % center current in amps
 nq.p.squid.I_span= 60e-6; % total span in amps
 nq.p.squid.I_step= .05e-6;  % current step in amps
-nq.p.squid.biasr = 2.5e3 + 10e3; %1.0k + 1.5k cold, 10k warm
+nq.p.squid.biasr = 2.5e3 + 10e3 + 99e3; %1.0k + 1.5k cold, 10k warm, 99k warm
 
 nq.p.ramppts     = 10;
 
@@ -34,7 +34,7 @@ nq.p.T           = 4.3;
 nq.p.Terr        = .013;
 nq.p.scantime    = 0;
 
-nq.notes = 'slower more detailed sweep to get baseline before switching to larger resistance';
+nq.notes = 'changed resistance, doing same measurement';
 
 %% Setup scan
 
