@@ -16,8 +16,8 @@ nq = NIdaq('DL', 'Z:/data/montana_b69/Squid_Tests/151011/'); %save path
 % Add and set parameters here! not in the code! if you want more params
 % add them here  All of these 'should' be saved ;)
 nq.p.gain        = 500;
-nq.p.lpf0        = 300;
-nq.p.rate        = 100; %0.1 < rate < 2 857 142.9
+nq.p.lpf0        = 1000;
+nq.p.rate        = 700; %0.1 < rate < 2 857 142.9
 nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
 
 nq.p.squid.I_cntr= 0e-6;  % center current in amps
@@ -34,7 +34,7 @@ nq.p.T           = 4.3;
 nq.p.Terr        = .013;
 nq.p.scantime    = 0;
 
-nq.notes = 'testing code for plotting forward and backward curves';
+nq.notes = 'sweeping fast to see if we see hysteresis better with forward and backwards plotting';
 
 %% Setup scan
 
@@ -73,7 +73,7 @@ datainb = squidVsraw(end:-1:1) / nq.p.squid.biasr*1e6;
 hold on
 plot(datainf, dataf, 'ro-');
 plot(datainb, datab, 'bs-');
-legend('low to high', 'high to low');
+legend('low to high', 'high to low', 'Location', 'northwest');
 
 title({ ...
        ['data  = ', CSUtils.parsefnameplot(nq.lastdatasave)],  ...
