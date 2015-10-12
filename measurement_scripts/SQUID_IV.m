@@ -22,7 +22,7 @@ nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
 
 nq.p.squid.I_cntr= 0e-6;  % center current in amps
 nq.p.squid.I_span= 40e-6; % total span in amps
-nq.p.squid.I_step= .1e-6;  % current step in amps
+nq.p.squid.I_step= .01e-6;  % current step in amps
 nq.p.squid.biasr = 2.5e3; %1.0k + 1.5k cold
 
 nq.p.mod.curr    = 0;
@@ -32,7 +32,7 @@ nq.p.T           = 4.3;
 nq.p.Terr        = .013;
 nq.p.scantime    = 0;
 
-nq.notes = 'Code change (center and span) test and ginzburg first test.  Fast (100hz) so see if we get hysteresis';
+nq.notes = 'Testing autoplotting for use with google slides and longer scan to see if still hysteretic';
 
 %% Setup scan
 
@@ -72,7 +72,7 @@ title({['param = ', CSUtils.parsefnameplot(nq.lastparamsave)], ...
 xlabel('I_{bias} = V_{bias}/R_{bias} (\mu A)','fontsize',20);
 ylabel('V_{squid} (V)','fontsize',20);
 mfilename
-print('-dpng', [nidaq.savedir,'autoplots/',LoggableObj.timestring(),'_', mfilename,'.png']);
+print('-dpng', [nq.savedir,'autoplots/',LoggableObj.timestring(),'_', mfilename,'.png']);
 nq.delete();
 
 
