@@ -55,7 +55,10 @@ function this = NIdaq(author, savedir)
 end
 
 function delete(this)
-%full clean close, including cleaning par
+	% set all input / output to zeros
+	this.zerothesource();
+	
+	% clean up
     this.delete@LoggableObj();
     clear this.sense;
     clear this.source;
@@ -119,6 +122,7 @@ end
 
 %%%%%%% Measurement Methods
 function [data, time] = run(this, willsave)
+	% do not save <=> willsave = 0
     if nargin < 2
         willsave = 1;
     end
@@ -152,6 +156,13 @@ end
 function save(this)
     % saves parameters
     this.saveparams({'sense','source'});
+end
+
+function zerothesource(this)
+	for i = 1:length(this.source)
+		this.setoutputdata(this.source(i).channelnumber, zeros(1,10));
+	end
+	[~,~] = run(this,0);
 end
 
 end % } END methods

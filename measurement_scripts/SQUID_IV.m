@@ -10,60 +10,69 @@ addpath([mainrepopath, 'modules']);
 
 
 %% Create NI daq object
-nidaq = NIdaq('DL', 'Z:/data/montana_b69/Squid_Tests/150928/'); %save path
+nq = NIdaq('DL', 'Z:/data/montana_b69/Squid_Tests/151011/'); %save path
 
 %% Set parameters to be used / saved by LoggableObj
 % Add and set parameters here! not in the code! if you want more params
 % add them here  All of these 'should' be saved ;)
-nidaq.p.gain        = 500;
-nidaq.p.lpf0        = 10;
-nidaq.p.mod_curr    = 0;
-nidaq.p.mod_biasr   = 2.5e3;
-nidaq.p.rate        = 3; %0.1 < rate < 2 857 142.9
-nidaq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
-nidaq.p.src_amp_I   = 20e-6; % current in amps
-nidaq.p.src_numpts  = 1000;
-nidaq.p.squid_biasr = 2.5e3 + 3e3; %1.0k + 1.5k cold, 3k warm
-nidaq.p.T           = 4.3;
-nidaq.p.Terr        = .013;
-nidaq.p.scantime    = 0;
+nq.p.gain        = 500;
+nq.p.lpf0        = 100;
+nq.p.rate        = 100; %0.1 < rate < 2 857 142.9
+nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
 
-nidaq.notes = 'testing at 7k';
+nq.p.squid.I_cntr= 0e-6;  % center current in amps
+nq.p.squid.I_span= 40e-6; % total span in amps
+nq.p.squid.I_step= .1e-6;  % current step in amps
+nq.p.squid.biasr = 2.5e3; %1.0k + 1.5k cold
+
+nq.p.mod.curr    = 0;
+nq.p.mod.biasr   = 2.5e3;
+
+nq.p.T           = 4.3;
+nq.p.Terr        = .013;
+nq.p.scantime    = 0;
+
+nq.notes = 'Code change (center and span) test and ginzburg first test.  Fast (100hz) so see if we get hysteresis';
 
 %% Setup scan
 
-nidaq.addinput_A ('Dev1', 0, 'Voltage', nidaq.p.range, 'SQUID V (sense)');
-nidaq.addinput_A ('Dev1', 4, 'Voltage', nidaq.p.range, 'unused');
-nidaq.addoutput_A('Dev1', 0, 'Voltage', nidaq.p.range, 'SQUID I (source)');
-nidaq.addoutput_A('Dev1', 1, 'Voltage', nidaq.p.range, 'unused');
+nq.addinput_A ('Dev1', 0, 'Voltage', nq.p.range, 'SQUID V (sense)');
+nq.addinput_A ('Dev1', 4, 'Voltage', nq.p.range, 'unused');
+nq.addoutput_A('Dev1', 0, 'Voltage', nq.p.range, 'SQUID I (source)');
+nq.addoutput_A('Dev1', 1, 'Voltage', nq.p.range, 'unused');
 
-nidaq.setrate    (nidaq.p.rate);
+nq.setrate    (nq.p.rate);
+
+numpts = nq.p.squid.I_span / nq.p.squid.I_step;
 
 %% Setup data
-desout = {nidaq.p.src_amp_I * nidaq.p.squid_biasr * sin(linspace(0,2*pi,nidaq.p.src_numpts)),...
-          nidaq.p.mod_curr * nidaq.p.mod_biasr *    linspace(1,1   ,nidaq.p.src_numpts)  ...
+desout = {nq.p.squid.I_span * nq.p.squid.biasr * ...
+            sin(linspace(0,2*pi,numpts)) + ...
+          nq.p.squid.I_cntr * nq.p.squid.biasr,...
+          nq.p.mod.curr * nq.p.mod.biasr *  ...  
+            linspace(1,1,numpts)  ...
          };
-nidaq.setoutputdata(0,desout{1});
-nidaq.setoutputdata(1,desout{2});
+nq.setoutputdata(0,desout{1});
+nq.setoutputdata(1,desout{2});
 
 %% Run / collect data
-[data, time] = nidaq.run();
+[data, time] = nq.run();
 
 %% Plot
-plot(desout{1}/nidaq.p.squid_biasr*1e6, data(:,1)/nidaq.p.gain);
+plot(desout{1}/nq.p.squid.biasr*1e6, data(:,1)/nq.p.gain);
 hold on
-title({['param = ', CSUtils.parsefnameplot(nidaq.lastparamsave)], ...
-       ['data  = ', CSUtils.parsefnameplot(nidaq.lastdatasave)],  ...
-       ['gain=',           num2str(nidaq.p.gain),                 ...
-       ', lp f_0 =',      num2str(nidaq.p.lpf0),                 ...
-       ', hz, rate =',    num2str(nidaq.p.rate),                 ...
-       ', hz r_{bias} = ' num2str(nidaq.p.squid_biasr),            ...
-       ', T = '           num2str(nidaq.p.T)                     ...
+title({['param = ', CSUtils.parsefnameplot(nq.lastparamsave)], ...
+       ['data  = ', CSUtils.parsefnameplot(nq.lastdatasave)],  ...
+       ['gain=',           num2str(nq.p.gain),                 ...
+       ', lp f_0 =',      num2str(nq.p.lpf0),                 ...
+       ', hz, rate =',    num2str(nq.p.rate),                 ...
+       ', hz r_{bias} = ' num2str(nq.p.squid.biasr),            ...
+       ', T = '           num2str(nq.p.T)                     ...
        ]});
 xlabel('I_{bias} = V_{bias}/R_{bias} (\mu A)','fontsize',20);
 ylabel('V_{squid} (V)','fontsize',20);
 
-nidaq.delete();
+nq.delete();
 
 
 
