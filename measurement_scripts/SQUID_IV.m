@@ -23,7 +23,7 @@ nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
 nq.p.squid.I_cntr= 0e-6;  % center current in amps
 nq.p.squid.I_span= 40e-6; % total span in amps
 nq.p.squid.I_step= .01e-6;  % current step in amps
-nq.p.squid.biasr = 2.5e3; %1.0k + 1.5k cold
+nq.p.squid.biasr = 2.5e3 + 10e3; %1.0k + 1.5k cold, 10k warm
 
 nq.p.mod.curr    = 0;
 nq.p.mod.biasr   = 2.5e3;
@@ -32,7 +32,7 @@ nq.p.T           = 4.3;
 nq.p.Terr        = .013;
 nq.p.scantime    = 0;
 
-nq.notes = 'Testing autoplotting for use with google slides and longer scan to see if still hysteretic';
+nq.notes = 'larger resistor, guen thinks nidaq voltage noisy causes hysteresis';
 
 %% Setup scan
 
