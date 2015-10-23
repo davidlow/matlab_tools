@@ -17,7 +17,7 @@ addpath([mainrepopath, 'modules']);
 
 
 %% Create NI daq object
-pathroot = 'Z:/data/montana_b69/Squid_Tests/151011/';
+pathroot = 'Z:/data/montana_b69/Squid_Tests/151023/';
 path = [pathroot, LoggableObj.timestring(), '_mod2D/' ];
 mkdir(path);
 nidaq = NIdaq('DL', path); %save path 
@@ -27,7 +27,7 @@ nidaq = NIdaq('DL', path); %save path
 % add them here  All of these 'should' be saved ;)
 nidaq.p.gain        = 500;
 nidaq.p.lpf0        = 1000;
-nidaq.p.rate        = 700; %0.1 < rate < 2 857 142.9
+nidaq.p.rate        = 900; %0.1 < rate < 2 857 142.9
 nidaq.p.T           = 6.0;
 nidaq.p.Terr        = .033;
 
@@ -38,13 +38,13 @@ nidaq.p.mod_biasr   = 2.5e3;  %1.0 + 1.5 cold
 
 nidaq.p.squid_I_cntr= 0e-6;  % center current in amps
 nidaq.p.squid_I_span= 50e-6; % total span in amps
-nidaq.p.squid_I_step= .01e-6;  % current step in amps
+nidaq.p.squid_I_step= .05e-6;  % current step in amps
 nidaq.p.squid_biasr = 2.5e3 + 10e3; %1.0k + 1.5k cold, 10k warm
 nidaq.p.ramppts     = 10;
 
 nidaq.p.range       = 1; % options: 0.1, 0.2, 0.5, 1, 5, 10
 
-nidaq.notes = 'long slow scan while I make a new resistor';
+nidaq.notes = 'testing weird squid with mod 2D';
 
 %% Setup scan
 
