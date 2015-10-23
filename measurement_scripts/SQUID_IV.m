@@ -10,12 +10,12 @@ addpath([mainrepopath, 'modules']);
 
 
 %% Create NI daq object
-nq = NIdaq('DL', 'Z:/data/montana_b69/Squid_Tests/151011/'); %save path
+nq = NIdaq('DL', 'Z:/data/montana_b69/Squid_Tests/151023/'); %save path
 
 %% Set parameters to be used / saved by LoggableObj
 % Add and set parameters here! not in the code! if you want more params
 % add them here  All of these 'should' be saved ;)
-nq.p.gain        = 500;
+nq.p.gain        = 250;
 nq.p.lpf0        = 1000;
 nq.p.rate        = 900; %0.1 < rate < 2 857 142.9
 nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
@@ -23,7 +23,7 @@ nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
 nq.p.squid.I_cntr= 0e-6;  % center current in amps
 nq.p.squid.I_span= 60e-6; % total span in amps
 nq.p.squid.I_step= .05e-6;  % current step in amps
-nq.p.squid.biasr = 2.5e3 + 10e3; %1.0k + 1.5k cold, 10k warm, 99k warm
+nq.p.squid.biasr = 2.5e3; %1.0k + 1.5k cold, 10k warm, 99k warm
 
 nq.p.ramppts     = 10;
 
