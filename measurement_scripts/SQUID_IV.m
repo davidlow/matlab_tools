@@ -16,8 +16,8 @@ nq = NIdaq('DL', 'Z:/data/montana_b69/Squid_Tests/151023/'); %save path
 % Add and set parameters here! not in the code! if you want more params
 % add them here  All of these 'should' be saved ;)
 nq.p.gain        = 250;
-nq.p.lpf0        = 10;
-nq.p.rate        = 9; %0.1 < rate < 2 857 142.9
+nq.p.lpf0        = 100;
+nq.p.rate        = 90; %0.1 < rate < 2 857 142.9
 nq.p.range       = 10; % options: 0.1, 0.2, 0.5, 1, 5, 10
 
 nq.p.squid.I_cntr= 0e-6;  % center current in amps
@@ -34,7 +34,7 @@ nq.p.T           = 4.3;
 nq.p.Terr        = .013;
 nq.p.scantime    = 0;
 
-nq.notes = 'slow squid IV with 99k warm bias.';
+nq.notes = 'slow squid IV with 99k warm bias open all other ports to make sure no shorts.';
 
 %% Setup scan
 
