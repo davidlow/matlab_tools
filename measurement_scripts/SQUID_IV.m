@@ -34,7 +34,7 @@ nq.p.T           = 4.3;
 nq.p.Terr        = .013;
 nq.p.scantime    = 0;
 
-nq.notes = 'low resistance, fast scan';
+nq.notes = 'fast scan no extra bias';
 
 %% Setup scan
 
